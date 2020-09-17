@@ -2,17 +2,23 @@
   <div id="app">
     <!-- <HelloWorld /> -->
     <Gauge />
+    <Echarts />
+    <Bargraph />
   </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
+import Echarts from './components/Echarts.vue'
 import Gauge from './components/Gauge.vue'
+import Bargraph from './components/Bargraph.vue'
+
 
 export default {
   name: 'App',
   components: {
-    Gauge
+    Gauge,
+    Echarts,
+    Bargraph
   }
 }
 </script>
@@ -26,6 +32,7 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 </style>

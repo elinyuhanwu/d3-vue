@@ -14,13 +14,10 @@ export default {
   data() {
     return {
       customerConnection: {
-        oldF: 33,
-        oldColor: '#00633f',
+        oldF: 73,
         newF: 50,
-        newColor: '#21936d',
         title: 'Customer Connection',
-        chartName: 'Sample N=X',
-        emptyColor: 'f8f8f8'
+        chartName: 'Sample N=X'
       },
       storeOperation: {
         oldF: 70,
@@ -40,38 +37,35 @@ export default {
       const innerRadius = 100;
       const outerRadius = 65;
       const pi = Math.PI;
-      let startColor = 'limegreen';  
-      let { oldColor, newColor } = this.customerConnection;
+      let startColor = 'limegreen',
+          emptyColor = 'f8f8f8',
+          oldColor = '#00633f',
+          newColor = '#21936d';
+      if(this.customerConnection.newF - this.customerConnection.oldF < 0) newColor="#ececec";
 
       const svg = d3.select("#gauge")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
 
       const arc = d3.arc()
-        .innerRadius(innerRadius)
-        .outerRadius(outerRadius)
-        .startAngle(-90 * (pi / 180));
+                    .innerRadius(innerRadius)
+                    .outerRadius(outerRadius)
+                    .startAngle(-90 * (pi / 180));
 
       const g = svg.append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-      // Set background color
+      // Set default background color
       g.append("path")
-      .datum({ endAngle: 90 * (pi / 180) })
-      .style("fill", this.customerConnection.emptyColor)
-      .attr("d", arc);
+        .datum({ endAngle: 90 * (pi / 180) })
+        .style("fill", emptyColor)
+        .attr("d", arc);
 
       // Set old color
-      const oldGround = g.append("path")
-      .datum({ endAngle: -90 * (pi / 180) })
-      .style("fill", oldColor)
-      .attr("d", arc);
-
-      // Set new color
-      const newGround = g.append("path")
-      .datum({ endAngle: -90 * (pi / 180) })
-      .style("fill", newColor)
-      .attr("d", arc);
+      const oldBackground = g.append("path")
+                          .datum({ endAngle: -90 * (pi / 180) })
+                          .style("fill", oldColor)
+                          .attr("d", arc);   
 
       // Display Current value Text
       svg.append("text")
@@ -92,17 +86,29 @@ export default {
           .text('%')
 
       const oldNum = this.customerConnection.oldF / 100 * 180;
-      const oldNumPi = Math.floor(oldNum - 89) * (pi / 180);
+      const oldNumPi = Math.floor(oldNum - 89) * (pi / 180); 
 
       const newNum = this.customerConnection.newF / 100 * 180;
       const newNumPi = Math.floor(newNum - 89) * (pi / 180);
+
+      // Set new Arc for new data
+      const arc2 = d3.arc()
+                     .innerRadius(innerRadius)
+                     .outerRadius(outerRadius)
+                     .startAngle(oldNumPi);      
+
+      // Set new color
+      const newBackground = g.append("path")
+                             .datum({ endAngle: -90 * (pi / 180) })
+                             .style("fill", newColor)
+                             .attr("d", arc2);     
 
       // Update animation
       const arcTween = (transition, newAngle) => { 
         transition.attrTween("d", d => {
           const interpolate = d3.interpolate(d.endAngle, newAngle);
           return t => {
-            d.endAngle = interpolate(t);  
+            d.endAngle = interpolate(t);
             return arc(d);
           };
         });       
@@ -113,28 +119,27 @@ export default {
           const interpolate = d3.interpolate(oldNumPi, newAngle);
           return t => {
             d.endAngle = interpolate(t);  
-            return arc(d);
+            return arc2(d);
           };
         });       
       }                      
-                              
 
       // Arc Transition
-      oldGround
+      oldBackground
         .transition()
-        .duration(750)
+        .duration(500)
         .styleTween("fill", function() { 
-          return d3.interpolate(oldColor, startColor);
+          return d3.interpolate(startColor, oldColor);
         })
         .call(arcTween, oldNumPi);
 
-      newGround
+      newBackground
         .transition()
-        .duration(2000)
+        .duration(3000)
         .styleTween("fill", function() { 
           return d3.interpolate(oldColor, newColor);
         })
-        .call(customArcTween, newNumPi);                    
+        .call(customArcTween, newNumPi);
     }
   }  
 }
